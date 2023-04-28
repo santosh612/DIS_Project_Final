@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FASHION CLUB</title>
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,700|Montserrat:300" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Chivo:300,700|Playfair+Display:700i" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Beth+Ellen|Nova+Cut&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/style_index.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
+ <!-- Include d3.js -->
+ <script src="https://d3js.org/d3.v4.js"></script>
+  <!-- Include Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+
+
+<style>
+
+.navbar-nav {
+        float: left;
+      }
+  .footer {
+  background-color: #f8f8f8;
+  padding: 20px;
+  text-align: center;
+}
+
+.footer .container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-text {
+  color: #555;
+  font-size: 14px;
+}
+/* Media Queries for Responsive Design */
+@media screen and (max-width: 768px) {
+  .footer {
+    padding: 10px;
+  }
+
+  .footer-text {
+    font-size: 12px;
+  }
+}
+     
+/* CSS code to make SVG element responsive */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+#graph-container {
+  background-color: lavender;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%; /* Set the aspect ratio of the SVG */
+  position: relative;
+}
+
+#graph {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 767px) {
+  /* CSS for small screens */
+  #graph-container {
+    padding-bottom: 100%;
+  }
+}
+
+
+</style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary ">
+    <div class="container-fluid">
+      <a class="navbar-brand " href="{{ url_for('index')}}"><span style="color: #F01C9C;">Fashion Avenue</span></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav  me-auto mb-2 mb-lg-0">
+          <li class="nav-item justify-content-end">
+            <a class="nav-link " aria-current="page" href="{{ url_for('index')}}">Home</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Products
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{{ url_for('product_men')}}">Men</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('product_women')}}">Women</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('product_kid')}}">Kid</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('contact')}}">About Us</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('stats')}}">Statistics</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('login')}}">Login</a>
+          </li>
+        </ul>
+                
+      </div>
+    </div>
+  </nav>
+
+<div class="container">
+  <form>
+    <h2>Graph Options</h2>
+    <div class="form-group">
+      <label for="graph-type">Graph Type: select the options to visualize</label>
+      <select class="form-control" id="graph-type">
+        <option value="bar">Bar Graph</option>
+        <option value="doughnut">Donut Graph</option>
+      </select>
+      <div><br /><h4><span>Comparision of rating on Men, Women and Kids products</span></h4></div>
+    </div>
+  </form>
+  <div id="graph-container">
+    <svg id="graph" ></svg>
+  </div>
+</div>
+
+
+
+
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<script>
+  // set the dimensions and margins of the graph
+  
+  var data = [
+    { x: "Men", y: 5 },
+    { x: "Women", y: 4},
+    { x: "kids", y: 4 },
+  ];
+  
+
+
+   // set the dimensions and margins of the graph
+   var margin = { top: 30, right: 30, bottom: 70, left: 60 },
+      width = 460 - margin.left - margin.right,
+      height = 400 - margin.top - margin.bottom;
+
+  
+  // Create the SVG container
+  var svg = d3.select("#graph")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  
+  // Define the scales for the x-axis and y-axis
+  var x = d3.scaleBand()
+    .range([0, width])
+    .padding(0.1);
+  
+  var y = d3.scaleLinear()
+    .range([height, 0]);
+  
+  var color = d3.scaleOrdinal()
+      .range(["#98abc5", "#8a89a6", "#7b6888"]);
+
+
+  // Define the axes
+  var xAxis = d3.axisBottom(x);
+  var yAxis = d3.axisLeft(y);
+  
+  // Draw the bar chart
+  function drawBarChart() {
+    // Set the domain of the x-axis and y-axis scales
+    x.domain(data.map(function(d) { return d.x; }));
+    y.domain([0, d3.max(data, function(d) { return d.y; })]);
+    
+      
+    // Draw the x-axis and y-axis
+    svg.append("g")
+      .attr("class", "x-axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+      .append("text")
+      .attr("class", "axis-label")
+      .attr("x", width / 2)
+      .attr("y", margin.bottom - 10)
+      .text("Categories");
+    
+    svg.append("g")
+      .attr("class", "y-axis")
+      .call(yAxis)
+      .append("text")
+      .attr("class", "axis-label")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -height / 2)
+      .attr("y", -margin.left + 20)
+      .text("Count");
+    
+ 
+
+    // Draw the bars
+    svg.selectAll(".bar")
+      .data(data)
+      .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d.x); })
+      .attr("y", function(d) { return y(d.y); })
+      .attr("width", x.bandwidth())
+      .attr("fill", function(d) { return color(d.x); })// set the fill color based on the data
+      .attr("height", function(d) { return height - y(d.y); });
+  }
+  
+  // Draw the donut chart
+  function drawDonutChart() {
+    // Set up the color scale
+    var color = d3.scaleOrdinal()
+      .range(["#98abc5", "#8a89a6", "#7b6888"]);
+    
+    // Set up the pie layout
+    var pie = d3.pie()
+      .value(function(d) { return d.y; });
+    
+// Define the arc generator
+var arc = d3.arc()
+.innerRadius(40)
+.outerRadius(Math.min(width, height) / 2 - 1);
+
+// Draw the donut chart
+var donut = svg.append("g")
+  .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var arcs = donut.selectAll(".arc")
+  .data(pie(data))
+  .enter().append("g")
+  .attr("class", "arc");
+
+arcs.append("path")
+  .attr("d", arc)
+  .attr("fill", function(d) { return color(d.data.x); });
+
+arcs.append("text")
+  .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+  .attr("text-anchor", "middle")
+  .text(function(d) { return d.data.x; });
+
+
+}
+
+// Draw the initial chart based on the selected option
+var selectedOption = document.getElementById("graph-type").value;
+if (selectedOption === "bar") {
+drawBarChart();
+} else if (selectedOption === "doughnut") {
+drawDonutChart();
+}
+
+// Update the chart when the selected option changes
+d3.select("#graph-type").on("change", function() {
+var selectedOption = d3.select(this).property("value");
+svg.selectAll("*").remove(); // clear the SVG container
+if (selectedOption === "bar") {
+drawBarChart();
+} else if (selectedOption === "doughnut") {
+drawDonutChart();
+}
+});
+</script>
+
+
+
+
+
+     
+      
+  
+
+  
+
+
+    <!-- Include Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"
+      integrity="sha384-zYPOMqeu1DAVkHiLqWBUTcbYfZ8osu1Nd6Z89ify25QV9guujx43ITvfi12/QExE"
+      crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"
+      integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ"
+      crossorigin="anonymous"></script>
+      <script src="https://d3js.org/d3.v6.min.js"></script>
+
+
+<!-- Include D3 JS -->
+
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+
+</body>
+<footer class="footer">
+  <div class="container">
+    <p class="footer-text">Fashion Avenue@Copyright</p>
+  </div>
+</footer>
+
+</html>
